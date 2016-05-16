@@ -1,0 +1,17 @@
+tags
+venv
+build
+.cache
+.idea
+.project
+.pydevproject
+.vagrant
+.vim.local
+*.DS_Store
+*.bak
+*.coverage
+*.debug
+*.map
+*.pyc
+*.ropeproject
+*.swp
