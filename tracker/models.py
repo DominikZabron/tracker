@@ -13,7 +13,6 @@ class Cart(Base):
     __tablename__ = 'cart'
 
     id = Column(UUIDType, primary_key=True, default=uuid.uuid4)
-    return_url = Column(String)
 
     items = relationship('Item', back_populates='cart')
 
