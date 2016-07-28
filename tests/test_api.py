@@ -1,5 +1,6 @@
 import falcon
 import pytest
+import uuid
 
 from tracker.urls import app as application
 application.req_options.auto_parse_form_urlencoded = True
@@ -17,4 +18,18 @@ def test_post_item_success(client):
 
 def test_post_item_returns_correct_response(client):
     resp = client.post('/item')
-    assert 'cart_id' in resp.body
+    assert 'cart_id' in resp.json
+
+
+def test_post_item_accept_param(client):
+    cart_id = str(uuid.uuid4())
+    # resp = client.post('/item/{0}'.format(cart_id))
+    resp = client.post('/item', {'cart_id': cart_id})
+    assert cart_id == resp.json['cart_id']
+
+"""
+def test_post_item_handle_cookies(client):
+    cart_id = str(uuid.uuid4())
+    resp = client.post('/item')
+    assert cart_id == resp.json['cart_id']
+"""
