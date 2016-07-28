@@ -7,11 +7,16 @@ import json
 
 class CartItem(object):
     def on_post(self, req, resp, cart_id=None):
-        if not cart_id:
-            cart_id = uuid.uuid4()
 
+        if not cart_id:
+            if 'cart_id' in req.cookies:
+                cart_id = req.cookies['cart_id']
+            else:
+                cart_id = str(uuid.uuid4())
+
+        resp.set_cookie('cart_id', cart_id)
         resp.status = falcon.HTTP_201
-        resp.body = json.dumps({'cart_id': str(cart_id)})
+        resp.body = json.dumps({'cart_id': cart_id})
 
 app = falcon.API()
 

@@ -23,13 +23,14 @@ def test_post_item_returns_correct_response(client):
 
 def test_post_item_accept_param(client):
     cart_id = str(uuid.uuid4())
-    # resp = client.post('/item/{0}'.format(cart_id))
-    resp = client.post('/item', {'cart_id': cart_id})
+    resp = client.post('/item/{0}'.format(cart_id))
     assert cart_id == resp.json['cart_id']
 
-"""
+
 def test_post_item_handle_cookies(client):
     cart_id = str(uuid.uuid4())
-    resp = client.post('/item')
+    cookie = 'cart_id={0}'.format(cart_id)
+    headers = {'Cookie': cookie}
+    resp = client.post('/item', headers=headers)
     assert cart_id == resp.json['cart_id']
-"""
+    assert cookie == resp.headers['set-cookie'].split(';')[0]
