@@ -16,3 +16,4 @@ build
 *.ropeproject
 *.swp
 *.pdf
+*.rdb

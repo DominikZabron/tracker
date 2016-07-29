@@ -3,3 +3,5 @@ SQLAlchemy-Utils==0.32.6
 psycopg2==2.6.1
 falcon==1.0.0
 pytest-falcon==0.3.3
+redis==2.10.5
+mock==2.0.0
