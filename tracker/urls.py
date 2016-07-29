@@ -4,8 +4,12 @@ import falcon
 import uuid
 import json
 
+from tracker.validation import validate_cart_id
+
 
 class CartItem(object):
+
+    @falcon.before(validate_cart_id)
     def on_post(self, req, resp, cart_id=None):
 
         if not cart_id:

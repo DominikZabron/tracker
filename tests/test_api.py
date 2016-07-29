@@ -34,3 +34,20 @@ def test_post_item_handle_cookies(client):
     resp = client.post('/item', headers=headers)
     assert cart_id == resp.json['cart_id']
     assert cookie == resp.headers['set-cookie'].split(';')[0]
+
+
+def test_post_item_validate_input_fail(client):
+    uuid_1, uuid_2 = str(uuid.uuid4()), str(uuid.uuid4())
+    cookie = 'cart_id={0}'.format(uuid_1)
+    headers = {'Cookie': cookie}
+    resp = client.post('/item/{0}'.format(uuid_2), headers=headers)
+    assert resp.status == falcon.HTTP_400
+    assert resp.json['title'] == "Bad request"
+
+
+def test_post_item_validate_input_success(client):
+    cart_id = str(uuid.uuid4())
+    cookie = 'cart_id={0}'.format(cart_id)
+    headers = {'Cookie': cookie}
+    resp = client.post('/item/{0}'.format(cart_id), headers=headers)
+    assert resp.status == falcon.HTTP_201
