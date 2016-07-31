@@ -1,4 +1,3 @@
-import json
 from celery import Celery
 
 from tracker.settings import REDIS_URL
@@ -8,7 +7,6 @@ app = Celery('tasks', broker=REDIS_URL)
 
 
 @app.task
-def process_request(req_stream, cart_id):
-    item_dict = json.loads(req_stream)
-    item_dict.update({'cart_id': cart_id})
-    save_item(item_dict)
+def db_save(data):
+    """Celery task to handle database interactions."""
+    save_item(data)

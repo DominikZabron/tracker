@@ -1,5 +1,6 @@
 import redis
 import uuid
+import json
 from sqlalchemy.sql import exists
 
 from tracker.db import Session
@@ -16,11 +17,21 @@ def create_cart_id():
     return cart_id
 
 
-def save_item(item_dict):
-    """
-    Save or update Item object in database.
+def json_loads(obj):
+    """Load json-formatted object to python dict."""
+    return json.loads(obj)
 
-    Create corresponding Cart if necessary."""
+
+def json_dumps(obj):
+    """Dump python dict to json-formatted object."""
+    return json.dumps(obj)
+
+
+def save_item(item_dict):
+    """Insert or update Item object in database.
+
+    Create corresponding Cart if necessary.
+    """
     session = Session()
 
     if not session.query(exists().where(
