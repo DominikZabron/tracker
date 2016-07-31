@@ -3,16 +3,21 @@ from __future__ import absolute_import
 import falcon
 import json
 
-from tracker.validation import validate_request
+from tracker.validators import validate_request
 from tracker.utils import create_cart_id
+from tracker.hooks import queue_request
 
 
 class CartItem(object):
+    def __init__(self):
+        self.cart_id = None
 
     @falcon.before(validate_request)
+    @falcon.after(queue_request)
     def on_post(self, req, resp, cart_id=None):
         if not cart_id:
-            cart_id = req.cookies.get('cart_id', create_cart_id())
+            cart_id = create_cart_id()
+        self.cart_id = cart_id
 
         resp.set_cookie('cart_id', cart_id)
         resp.status = falcon.HTTP_201

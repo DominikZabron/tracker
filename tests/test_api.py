@@ -10,6 +10,7 @@ application.req_options.auto_parse_form_urlencoded = True
 mock = MagicMock()
 mock.sismember.return_value = 1
 mock.sadd = MagicMock()
+mock.proc_req_delay = MagicMock()
 
 
 @pytest.fixture
@@ -17,6 +18,7 @@ def app():
     return application
 
 
+@patch('tracker.hooks.process_request.delay', mock.proc_req_delay)
 @patch('tracker.utils.cache.sadd', mock.sadd)
 def test_post_item_success(client):
     mock.sadd.call_count = 0
@@ -25,6 +27,7 @@ def test_post_item_success(client):
     assert mock.sadd.call_count == 1
 
 
+@patch('tracker.hooks.process_request.delay', mock.proc_req_delay)
 @patch('tracker.utils.cache.sadd', mock.sadd)
 def test_post_item_returns_correct_response(client):
     mock.sadd.call_count = 0
@@ -33,7 +36,8 @@ def test_post_item_returns_correct_response(client):
     assert mock.sadd.call_count == 1
 
 
-@patch('tracker.validation.cache.sismember', mock.sismember)
+@patch('tracker.hooks.process_request.delay', mock.proc_req_delay)
+@patch('tracker.validators.cache.sismember', mock.sismember)
 def test_post_item_accept_param(client):
     mock.sismember.call_count = 0
     cart_id = str(uuid.uuid4())
@@ -42,7 +46,8 @@ def test_post_item_accept_param(client):
     assert mock.sismember.call_count == 1
 
 
-@patch('tracker.validation.cache.sismember', mock.sismember)
+@patch('tracker.hooks.process_request.delay', mock.proc_req_delay)
+@patch('tracker.validators.cache.sismember', mock.sismember)
 def test_post_item_handle_cookies(client):
     mock.sismember.call_count = 0
     cart_id = str(uuid.uuid4())
@@ -54,7 +59,8 @@ def test_post_item_handle_cookies(client):
     assert mock.sismember.call_count == 1
 
 
-@patch('tracker.validation.cache.sismember', mock.sismember)
+@patch('tracker.hooks.process_request.delay', mock.proc_req_delay)
+@patch('tracker.validators.cache.sismember', mock.sismember)
 def test_post_item_validate_input_fail(client):
     mock.sismember.call_count = 0
     uuid_1, uuid_2 = str(uuid.uuid4()), str(uuid.uuid4())
@@ -66,7 +72,8 @@ def test_post_item_validate_input_fail(client):
     assert mock.sismember.call_count == 0
 
 
-@patch('tracker.validation.cache.sismember', mock.sismember)
+@patch('tracker.hooks.process_request.delay', mock.proc_req_delay)
+@patch('tracker.validators.cache.sismember', mock.sismember)
 def test_post_item_validate_input_success(client):
     mock.sismember.call_count = 0
     cart_id = str(uuid.uuid4())
@@ -77,6 +84,7 @@ def test_post_item_validate_input_success(client):
     assert mock.sismember.call_count == 1
 
 
+@patch('tracker.hooks.process_request.delay', mock.proc_req_delay)
 @patch('tracker.utils.cache.sadd', mock.sadd)
 def test_post_item_cart_id_not_exist(client):
     mock.sadd.call_count = 0
