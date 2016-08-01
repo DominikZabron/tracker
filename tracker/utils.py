@@ -1,6 +1,6 @@
 import redis
 import uuid
-import json
+import ujson
 from sqlalchemy.sql import exists
 
 from tracker.db import Session
@@ -19,12 +19,12 @@ def create_cart_id():
 
 def json_loads(obj):
     """Load json-formatted object to python dict."""
-    return json.loads(obj)
+    return ujson.loads(obj)
 
 
 def json_dumps(obj):
     """Dump python dict to json-formatted object."""
-    return json.dumps(obj)
+    return ujson.dumps(obj)
 
 
 def save_item(item_dict, session=Session):

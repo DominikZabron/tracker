@@ -1,9 +1,8 @@
 from __future__ import absolute_import
 
 import falcon
-import json
 
-from tracker.utils import create_cart_id
+from tracker.utils import create_cart_id, json_dumps
 from tracker.hooks import validate_request
 from tracker.tasks import db_save
 
@@ -17,7 +16,7 @@ class CartItem(object):
 
         resp.set_cookie('cart_id', params.get('cart_id'))
         resp.status = falcon.HTTP_201
-        resp.body = json.dumps({'cart_id': params.get('cart_id')})
+        resp.body = json_dumps({'cart_id': params.get('cart_id')})
 
 app = falcon.API()
 
