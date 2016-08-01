@@ -27,12 +27,12 @@ def json_dumps(obj):
     return json.dumps(obj)
 
 
-def save_item(item_dict):
+def save_item(item_dict, session=Session):
     """Insert or update Item object in database.
 
     Create corresponding Cart if necessary.
     """
-    session = Session()
+    session = session()
 
     if not session.query(exists().where(
                     Cart.id == item_dict.get('cart_id'))).scalar():
@@ -51,3 +51,4 @@ def save_item(item_dict):
         session.add(item)
 
     session.commit()
+    session.close()
