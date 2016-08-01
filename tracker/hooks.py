@@ -14,6 +14,10 @@ def validate_request(req, resp, resource, params):
     Validation includes:
     * check if cookie and url id values are consistent
     * ensure given id exists within created cards
+    * raise exception when unable to deserialize request
+    * convert fields to desired format if possible
+
+    Return dictionary of valid item-object data.
     """
     param_id = params.get('id', None)
     cookie_id = req.cookies.get('cart_id', None)
