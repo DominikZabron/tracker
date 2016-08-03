@@ -7,6 +7,7 @@ import json
 from mock import MagicMock, patch
 
 from tracker.utils import cache
+from tests.test_utils import db_connection
 from tracker.validators import (
     validate_cart_ids_differ,
     validate_cart_id_exists,
@@ -15,8 +16,10 @@ from tracker.validators import (
 )
 
 mock = MagicMock()
-mock.sismember_0.return_value = 0
-mock.sismember_1.return_value = 1
+mock.exists_0.return_value = 0
+mock.exists_1.return_value = 1
+mock.cart_id_db_exists_false.return_value = False
+mock.cart_id_db_exists_true.return_value = True
 
 
 def test_validate_cart_ids_equal():
@@ -32,21 +35,27 @@ def test_validate_cart_ids_differ():
         validate_cart_ids_differ(cart_id_1, cart_id_2)
 
 
-@patch('tracker.utils.cache.sismember', mock.sismember_1)
+@patch('tracker.validators.cart_id_db_exists', mock.cart_id_db_exists_true)
+@patch('tracker.utils.cache.exists', mock.exists_1)
 def test_validate_cart_id_exist_true():
-    mock.sismember_1.call_count = 0
+    mock.exists_1.call_count = 0
+    mock.cart_id_db_exists_true.call_count = 0
     cart_id = uuid.uuid4()
-    validate_cart_id_exists(cart_id, cache)
-    assert mock.sismember_1.call_count == 1
+    validate_cart_id_exists(cart_id, cache, db_connection)
+    assert mock.exists_1.call_count == 1
+    assert mock.cart_id_db_exists_true.call_count == 0
 
 
-@patch('tracker.utils.cache.sismember', mock.sismember_0)
+@patch('tracker.validators.cart_id_db_exists', mock.cart_id_db_exists_false)
+@patch('tracker.utils.cache.exists', mock.exists_0)
 def test_validate_cart_id_exist_false():
-    mock.sismember_0.call_count = 0
+    mock.exists_0.call_count = 0
+    mock.cart_id_db_exists_false.call_count = 0
     cart_id = uuid.uuid4()
     with pytest.raises(falcon.HTTPNotFound):
-        validate_cart_id_exists(cart_id, cache)
-    assert mock.sismember_0.call_count == 1
+        validate_cart_id_exists(cart_id, cache, db_connection)
+    assert mock.exists_0.call_count == 1
+    assert mock.cart_id_db_exists_false.call_count == 1
 
 
 def test_deserialize_request_success():

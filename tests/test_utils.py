@@ -1,22 +1,34 @@
 import uuid
+import psycopg2
+from urlparse import urlparse
 from mock import MagicMock, patch
 from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker
 
-from tracker import settings
 from tracker.models import Cart, Item
+from tracker.settings import TEST_DB_DSN
 from tracker.utils import (
     create_cart_id,
+    cart_id_db_exists,
     json_loads,
     json_dumps,
     save_item,
 )
-engine = create_engine(settings.TEST_DB_DSN)
+
+result = urlparse(url=TEST_DB_DSN)
+db_connection = psycopg2.connect(
+    database=result.path[1:],
+    user=result.username,
+    password=result.password,
+    host=result.hostname,
+)
+
+engine = create_engine(TEST_DB_DSN)
 Session = sessionmaker(bind=engine)
 session = Session()
 
 mock = MagicMock()
-mock.sadd = MagicMock()
+mock.setex = MagicMock()
 
 
 def setup_function(function):
@@ -30,13 +42,26 @@ def teardown_function(function):
     session.close()
 
 
-@patch('tracker.utils.cache.sadd', mock.sadd)
+@patch('tracker.utils.cache.setex', mock.setex)
 def test_create_cart_id():
     mock.cache.call_count = 0
     new_id = create_cart_id()
-    assert mock.sadd.call_count == 1
+    assert mock.setex.call_count == 1
     assert len(new_id) == 36
     assert type(new_id) == str
+
+
+def test_cart_id_db_exists_true():
+    cart = Cart()
+    session.add(cart)
+    session.commit()
+    assert cart_id_db_exists(str(cart.id), db_connection)
+
+
+@patch('tracker.utils.cache.setex', mock.setex)
+def test_cart_id_db_exists_false():
+    new_id = create_cart_id()
+    assert not cart_id_db_exists(new_id, db_connection)
 
 
 def test_json_loads():

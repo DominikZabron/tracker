@@ -13,8 +13,18 @@ cache = redis.StrictRedis.from_url(REDIS_URL)
 def create_cart_id():
     """Create valid cart_id in a form of uuid."""
     cart_id = str(uuid.uuid4())
-    cache.sadd('cart_ids', cart_id)
+    cache.setex(cart_id, 2592000, '0')  # expire after 30 days
     return cart_id
+
+
+def cart_id_db_exists(cart_id, db_connection):
+    """Return True when given cart_id exists in database, otherwise False."""
+    cur = db_connection.cursor()
+    cur.execute('SELECT 1 FROM cart WHERE cart.id = (%s);', (cart_id,))
+    if cur.fetchone():
+        return True
+    else:
+        return False
 
 
 def json_loads(obj):

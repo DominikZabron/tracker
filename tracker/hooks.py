@@ -1,8 +1,19 @@
+import psycopg2
+from urlparse import urlparse
 from tracker.utils import cache
+from tracker.settings import DB_DSN
 from tracker.validators import (
     validate_cart_ids_differ,
     validate_cart_id_exists,
     deserialize_request,
+)
+
+result = urlparse(url=DB_DSN)
+db_connection = psycopg2.connect(
+    database=result.path[1:],
+    user=result.username,
+    password=result.password,
+    host=result.hostname,
 )
 
 
@@ -28,7 +39,11 @@ def validate_request(req, resp, resource, params):
     if param_id or cookie_id:
         # Save cart_id for further use in responder
         params['cart_id'] = param_id if param_id else cookie_id
-        validate_cart_id_exists(cart_id=params['cart_id'], cache=cache)
+        validate_cart_id_exists(
+            cart_id=params['cart_id'],
+            cache=cache,
+            db_connection=db_connection,
+        )
 
     item_dict = deserialize_request(req.stream.read())
     params.update(item_dict)

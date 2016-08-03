@@ -1,6 +1,7 @@
 import falcon
 
 from tracker.utils import json_loads
+from tracker.utils import cart_id_db_exists
 
 
 def validate_cart_ids_differ(param_id, cookie_id):
@@ -10,10 +11,11 @@ def validate_cart_ids_differ(param_id, cookie_id):
         raise falcon.HTTPBadRequest('Bad request', msg)
 
 
-def validate_cart_id_exists(cart_id, cache):
+def validate_cart_id_exists(cart_id, cache, db_connection):
     """Raise 404 if given cart_id is not recognized."""
-    if cache.sismember('cart_ids', cart_id) == 0:
-        raise falcon.HTTPNotFound()
+    if cache.exists(cart_id) == 0:
+        if not cart_id_db_exists(cart_id, db_connection):
+            raise falcon.HTTPNotFound()
 
 
 def deserialize_request(json_body):
