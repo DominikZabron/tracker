@@ -1,7 +1,7 @@
 import redis
 import uuid
 import ujson
-from sqlalchemy.sql import exists
+from sqlalchemy import exc
 
 from tracker.db import Session
 from tracker.models import Cart, Item
@@ -44,9 +44,11 @@ def save_item(item_dict, session=Session):
     """
     session = session()
 
-    if not session.query(exists().where(
-                    Cart.id == item_dict.get('cart_id'))).scalar():
+    try:
         session.add(Cart(id=item_dict.get('cart_id')))
+        session.commit()
+    except exc.IntegrityError:
+        session.rollback()
 
     item = session.query(Item).filter(
         Item.cart_id == item_dict.get('cart_id'),
